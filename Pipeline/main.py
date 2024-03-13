@@ -8,6 +8,8 @@ from utils.parsing_utils import upload_frame_to_s3
 import botocore
 import json
 from datetime import datetime
+import threading
+
 
 def start_stream_processing(region, kvs_name, kvs_arn, sm_inf_endpoint, kds_name):
     location = 'HALL'
@@ -50,15 +52,33 @@ def start_stream_processing(region, kvs_name, kvs_arn, sm_inf_endpoint, kds_name
     
                     # Generate the object name by concatenating location with the timestamp
                     object_name = f"detected_frames/{location}/frame_{timestamp}.jpg"
-                    upload_frame_to_s3(frame=frame,
-                                       bucket_name=bucket_name,
-                                       object_name=object_name)
+                    thread_upload_s3 = threading.Thread(
+                                target=upload_frame_to_s3, 
+                                args=(
+                                    frame,
+                                    bucket_name, 
+                                    object_name
+                                )
+                            )
+                    thread_upload_s3.start()
 
                     kds_response['location'] = location
                     kds_response['s3_file_name'] = 1
                     kds_response_str = json.dumps(kds_response)
                     data_to_write = kds_response_str.encode('utf-8')
-                    write_to_kinesis(kds_name, data_to_write, partition_key)
+                    thread_write_kinesis = threading.Thread(
+                                    target=write_to_kinesis,
+                                    args=(
+                                        kds_name,
+                                        data_to_write,
+                                        partition_key
+                                    )
+                                )
+                    thread_write_kinesis.start()
+                    thread_upload_s3.join()
+                    thread_write_kinesis.join()
+
+
 
     vcap.release()
 def main(region, kvs_name, kvs_arn, sm_inf_endpoint, kds_name) :
