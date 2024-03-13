@@ -1,0 +1,1 @@
+python main.py --kvs_name demo-rtsp --kvs_arn arn:aws:kinesisvideo:us-east-1:089757678707:stream/demo-rtsp/1709836324700 --region us-east-1 --sm_inf_endpoint '/endpoints/weapon-detection-yolor-endpoint2024-03-12-16-39-14/invocations/' --kds_name 'weapon-detection-cloudformation-demo-Kds-4Wah1uIxMffE'

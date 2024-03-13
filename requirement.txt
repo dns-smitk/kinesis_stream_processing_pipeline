@@ -117,7 +117,6 @@ Pygments @ file:///home/conda/feedstock_root/build_artifacts/pygments_1700607939
 PyJWT==2.0.0
 pylint==2.6.0
 pyparsing==2.4.7
-
 pytest==8.0.0
 pytest-asyncio==0.21.1
 python-dateutil @ file:///home/conda/feedstock_root/build_artifacts/python-dateutil_1709299778482/work
