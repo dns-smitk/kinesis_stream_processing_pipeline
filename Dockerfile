@@ -12,13 +12,14 @@ RUN wget https://bootstrap.pypa.io/get-pip.py && python3 get-pip.py && \
 
 #pre-trained model package installation
 RUN apt-get update && apt-get install ffmpeg libsm6 libxext6  -y
-RUN wget https://raw.githubusercontent.com/dns-smitk/kinesis_stream_processing_pipeline/main/requirement.txt | pip install -r requirement.txt
-RUN sh start_default.sh 
+RUN wget https://raw.githubusercontent.com/dns-smitk/kinesis_stream_processing_pipeline/main/Pipeline/requirement.txt | pip install -r requirement.txt
+
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=TRUE
 ENV PYTHONDONTWRITEBYTECODE=TRUE
 ENV PATH="/opt/program:${PATH}"
 
-COPY NER /opt/program
+COPY Pipeline /opt/program
 WORKDIR /opt/program
+RUN sh start_default.sh 
