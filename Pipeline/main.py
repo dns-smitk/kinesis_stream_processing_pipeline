@@ -62,25 +62,20 @@ def start_stream_processing(region, kvs_name, kvs_arn, sm_inf_endpoint, kds_name
 
     vcap.release()
 def main(region, kvs_name, kvs_arn, sm_inf_endpoint, kds_name) :
-    try : 
-        start_stream_processing(
-            region=region,
-            kvs_name=kvs_name,
-            kvs_arn=kvs_arn,
-            sm_inf_endpoint=sm_inf_endpoint,
-            kds_name=kds_name
-            )
-    except Exception as e:
-        print('kinesis stream is not available')
-        print('restarting in 5 seconds')
-        time.sleep(5)
-        start_stream_processing(
-            region=region,
-            kvs_name=kvs_name,
-            kvs_arn=kvs_arn,
-            sm_inf_endpoint=sm_inf_endpoint,
-            kds_name=kds_name
-            )
+    while True :
+        try : 
+            start_stream_processing(
+                region=region,
+                kvs_name=kvs_name,
+                kvs_arn=kvs_arn,
+                sm_inf_endpoint=sm_inf_endpoint,
+                kds_name=kds_name
+                )
+        except Exception as e:
+            print('kinesis stream is not available')
+            print('restarting in 5 seconds')
+            time.sleep(5)
+        
 
     
 if __name__ == '__main__':
