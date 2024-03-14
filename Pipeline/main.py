@@ -41,42 +41,45 @@ def start_stream_processing(region, kvs_name, kvs_arn, sm_inf_endpoint, kds_name
             endpoint = sm_inf_endpoint
             response_data = send_frame_with_signed_request(frame, service, region, host, endpoint)
             if response_data:
-                # Define your Kinesis Data Stream name and partition key
-               
                 partition_key = 'cam-1'
+                print(response_data)
                 kds_response = json.loads(response_data)['output']
-
+                timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+                object_name = f"undetected_frames/{location}/frame_{timestamp}.jpg"
+                upload_frame_to_s3(frame, bucket_name, object_name)
                 if len(kds_response['boxes']) > 1 :
                     print('detected')
-                    timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+                    
     
                     # Generate the object name by concatenating location with the timestamp
                     object_name = f"detected_frames/{location}/frame_{timestamp}.jpg"
-                    thread_upload_s3 = threading.Thread(
-                                target=upload_frame_to_s3, 
-                                args=(
-                                    frame,
-                                    bucket_name, 
-                                    object_name
-                                )
-                            )
-                    thread_upload_s3.start()
+                    # thread_upload_s3 = threading.Thread(
+                    #             target=upload_frame_to_s3, 
+                    #             args=(
+                    #                 frame,
+                    #                 bucket_name, 
+                    #                 object_name
+                    #             )
+                    #         )
+                    # thread_upload_s3.start()
+                    upload_frame_to_s3(frame, bucket_name, object_name)
 
                     kds_response['location'] = location
                     kds_response['s3_file_name'] = 1
                     kds_response_str = json.dumps(kds_response)
                     data_to_write = kds_response_str.encode('utf-8')
-                    thread_write_kinesis = threading.Thread(
-                                    target=write_to_kinesis,
-                                    args=(
-                                        kds_name,
-                                        data_to_write,
-                                        partition_key
-                                    )
-                                )
-                    thread_write_kinesis.start()
-                    thread_upload_s3.join()
-                    thread_write_kinesis.join()
+                    write_to_kinesis(kds_name, data_to_write, partition_key)
+                    # thread_write_kinesis = threading.Thread(
+                    #                 target=write_to_kinesis,
+                    #                 args=(
+                    #                     kds_name,
+                    #                     data_to_write,
+                    #                     partition_key
+                    #                 )
+                    #             )
+                    # thread_write_kinesis.start()
+                    # thread_upload_s3.join()
+                    # thread_write_kinesis.join()
 
 
 
@@ -92,7 +95,7 @@ def main(region, kvs_name, kvs_arn, sm_inf_endpoint, kds_name) :
                 kds_name=kds_name
                 )
         except Exception as e:
-            print('kinesis stream is not available')
+            print(f'Error {e}')
             print('restarting in 5 seconds')
             time.sleep(5)
         
